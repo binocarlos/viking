@@ -1,0 +1,38 @@
+{
+  "name": "viking",
+  "version": "1.0.0",
+  "description": "Docker based deployment platform",
+  "main": "index.js",
+  "bin": {
+    
+  },
+  "directories": {
+    
+  },
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binocarlos/viking.git"
+  },
+  "keywords": [
+    "docker",
+    "platform",
+    "deploy",
+    "host",
+    "paas"
+  ],
+  "author": "Kai Davenport",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/binocarlos/viking/issues"
+  },
+  "homepage": "https://github.com/binocarlos/viking",
+  "dependencies": {
+    
+  },
+  "devDependencies": {
+    "tape": "^2.12.3"
+  }
+}
