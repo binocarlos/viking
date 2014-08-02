@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "description": "Docker based deployment platform",
   "main": "index.js",
-  "bin": {
-    
-  },
-  "directories": {
-    
-  },
+  "bin": {},
+  "directories": {},
   "scripts": {
-    "test": "set -e; for t in test/*.js; do node $t; done"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -30,7 +26,7 @@
   },
   "homepage": "https://github.com/binocarlos/viking",
   "dependencies": {
-    
+    "minimist": "^0.2.0"
   },
   "devDependencies": {
     "tape": "^2.12.3"

@@ -1,7 +1,7 @@
 viking
 ------
 
-Docker based deployment platform
+Docker platform for warriors
 
 ## install
 
