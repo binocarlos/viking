@@ -1,1 +1,2 @@
-ps: node ./ps.js
+ps: node ./ps.js $@
+help: node ./help.js $@
