@@ -1,2 +1,2 @@
 #!/bin/bash
-$(node node_modules/trig/cli.js triggers/default run $@)
+$(node node_modules/trig/cli.js triggers/default $VIKING_TRIGGERS run $@)
