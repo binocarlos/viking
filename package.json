@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/binocarlos/viking",
   "dependencies": {
-    "minimist": "^0.2.0"
+    "minimist": "^0.2.0",
+    "trig": "^0.2.1"
   },
   "devDependencies": {
     "tape": "^2.12.3"
