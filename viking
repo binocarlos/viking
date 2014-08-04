@@ -24,26 +24,18 @@ install-docker(){
 	sleep 2
 }
 
-pull-slave-images(){
-	docker pull progrium/registrator
-	docker pull progrium/ambassadord
-}
-
-pull-master-images(){
-	docker pull binocarlos/etcd
-	docker pull binocarlos/smesh
-}
-
 install-core() {	
 	install-docker
 }
 
 install-slave() {
-	pull-slave-images
+	docker pull progrium/registrator
+	docker pull progrium/ambassadord
 }
 
 install-master() {
-	pull-master-images
+	docker pull binocarlos/etcd
+	docker pull binocarlos/smesh
 }
 
 cmd-install() {
@@ -71,11 +63,44 @@ stop-registrator(){
 	docker stop registrator && docker rm registrator
 }
 
+master-start() {
+	running=$(docker ps | grep smesh)
+	if [ -z "$1" ]; then
+		echo "usage: viking master start --peers --token"
+		exit 1
+	fi
+	if [ -n "$running" ]; then
+		echo "the master is already running"
+		exit 1
+	fi
+	if [ -z $VIKING_ETCD ]; then
+		echo "VIKING_ETCD variable needed"
+		exit 1
+	fi
+	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
+	docker run -d \
+		-p 8791:80 \
+		--name viking-master \
+		--hostname $HOSTNAME \
+		-e VIKING_ETCD=$VIKING_ETCD \
+		binocarlos/viking http
+}
+
+master-stop() {
+	docker stop smesh && docker rm smesh
+	docker stop viking-master && docker rm viking-master
+}
+
 # MASTER
 cmd-master() {
 	check-environment
-	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
-	docker run -d -p 8791:80 binocarlos/viking http
+	case "$1" in	
+	start)              shift; master-start $@;;
+	stop)              shift; master-stop $@;;
+  *)
+		echo "usage: viking master (start|stop)"
+	;;
+	esac
 }
 
 cmd-etcdctl() {
@@ -84,7 +109,7 @@ cmd-etcdctl() {
 }
 
 cmd-proxy() {
-	echo "proxy"
+	docker run --rm -ti binocarlos/viking $@
 }
 
 # CONTROLLER

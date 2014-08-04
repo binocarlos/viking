@@ -1,3 +1,4 @@
+var http = require('http')
 var args = require('minimist')(process.argv, {
 	alias:{
 		
@@ -7,13 +8,8 @@ var args = require('minimist')(process.argv, {
 	}
 })
 
-
-
-var commands = {
-	token:commandToken,
-	start:commandStart
+var app = function(req,res){
+	res.end('ok')
 }
-
-var command = args._[2] || 'help'
-
-commands[command]()
+var server = http.createServer(app)
+server.listen(80)
