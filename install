@@ -1,9 +1,31 @@
 #!/bin/bash
 
 readonly IMAGE="binocarlos/viking"
+readonly DOCKER_INSTALL="https://get.docker.io/ubuntu/"
+export DOCKER_PORT=${DOCKER_PORT:=2375}
+
+check-environment(){
+	if [ -z $HOSTNAME ]; then
+		echo "HOSTNAME variable needed"
+		exit 1
+	fi
+	if [ -z $VIKING_IP ]; then
+		echo "VIKING_IP variable needed"
+		exit 1
+	fi
+}
+
+install-docker(){
+	curl -sSL $DOCKER_INSTALL | sudo sh
+	sysctl -w net.ipv4.ip_forward=1
+	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:$DOCKER_PORT'" > /etc/default/docker
+	service docker restart
+	sleep 2
+}
 
 cmd-core() {
-	echo "core"
+	check-environment
+	install-docker
 }
 
 cmd-master() {
@@ -11,7 +33,7 @@ cmd-master() {
 }
 
 cmd-slave() {
-	echo "slave"	
+	echo "slave"
 }
 
 cmd-help() {
