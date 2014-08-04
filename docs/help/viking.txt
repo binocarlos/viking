@@ -3,5 +3,9 @@ Usage: viking [OPTIONS] COMMAND [arg...]
 A composable platform for service orientated architecture
 
 Commands:
-  ps         List containers
+  ps          List containers
+  hosts				List servers
+  links       Show links between containers
+  inspect     Show a single container data
+  attach      Attach to a single container  
   

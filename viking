@@ -1,2 +1,16 @@
 #!/bin/bash
-$(node node_modules/trig/cli.js triggers/default $VIKING_TRIGGERS run $@)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+## dir is the folder the script is running in
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+VIKING_TRIGGERS="$DIR/triggers/default;$VIKING_TRIGGERS"
+IFS=';' read -ra TRIGGER <<< "$VIKING_TRIGGERS"
+for i in "${TRIGGER[@]}"; do
+  # process "$i"
+  echo "TRIGGER $i"
+done
+#docker run -ti --rm -v $VIKING_TRIGGERS:$VIKING_TRIGGERS -v :/triggers binocarlos/viking run $@
