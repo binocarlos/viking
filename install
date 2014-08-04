@@ -2,21 +2,6 @@
 
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
-export DOCKER_PORT=${DOCKER_PORT:=2375}
-
-export SMESH_URL=${SMESH_URL:="https://raw.github.com/binocarlos/docker-install/master/bootstrap.sh"}
-
-
-check-environment(){
-	if [ -z $HOSTNAME ]; then
-		echo "HOSTNAME variable needed"
-		exit 1
-	fi
-	if [ -z $VIKING_IP ]; then
-		echo "VIKING_IP variable needed"
-		exit 1
-	fi
-}
 
 install-docker(){
 	curl -sSL $DOCKER_INSTALL | sudo sh
@@ -26,45 +11,15 @@ install-docker(){
 	sleep 2
 }
 
-install-smesh(){
-	curl -sSL $SMESH_URL | sudo sh
-}
-
-cmd-core() {
-	check-environment
-	install-docker
-}
-
-cmd-master() {
-	echo "master"
-}
-
-cmd-slave() {
-	echo "slave"
-}
-
-cmd-help() {
-	cat <<EOF
-
-usage: install COMMAND [args]
-
-commands:
-
-  core
-  master
-  slave
-
-EOF
+pull-images(){
+	docker pull binocarlos/etcd
+	docker pull binocarlos/smesh
 }
 
 main() {
 	set -eo pipefail
-	case "$1" in
-	core)               shift; cmd-core $@;;
-	master)             shift; cmd-master $@;;
-	slave)              shift; cmd-slave $@;;
-	*)                  cmd-help $@;;
-	esac
+	install-docker
+	pull-images
 }
 
 main "$@"

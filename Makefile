@@ -1,7 +1,7 @@
 .PHONY: install
 
 install:
-	sudo -E bash -c './install core'
+	./install core
 
 vagrant:
 	usermod -aG docker vagrant
