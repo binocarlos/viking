@@ -1,3 +1,0 @@
-help: node ./help.js $@
-ps: node ./ps.js $@
-hosts: echo $VIKING_IP

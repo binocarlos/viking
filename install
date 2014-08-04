@@ -1,0 +1,41 @@
+#!/bin/bash
+
+readonly IMAGE="binocarlos/viking"
+
+cmd-core() {
+	echo "core"
+}
+
+cmd-master() {
+	echo "master"
+}
+
+cmd-slave() {
+	echo "slave"	
+}
+
+cmd-help() {
+	cat <<EOF
+
+usage: install COMMAND [args]
+
+commands:
+
+  core
+  master
+  slave
+
+EOF
+}
+
+main() {
+	set -eo pipefail
+	case "$1" in
+	core)               shift; cmd-core $@;;
+	master)             shift; cmd-master $@;;
+	slave)              shift; cmd-slave $@;;
+	*)                  cmd-help $@;;
+	esac
+}
+
+main "$@"
