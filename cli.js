@@ -1,17 +1,12 @@
-var args = require('minimist')(process.argv, {
-	alias:{
-		
-	},
-	default:{
-		
-	}
-})
+var fs = require('fs')
+var path = require('path')
 
-var commands = {
-	token:commandToken,
-	start:commandStart
+function commandPath(name){
+	return path.join(__dirname, 'commands', command + '.js')
+}
+var command = process.argv[2] || 'help'
+if(!fs.existsSync(commandPath(command))){
+	command = 'help'
 }
 
-var command = args._[2] || 'start'
-
-commands[command]()
+require(commandPath(command))

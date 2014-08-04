@@ -3,8 +3,6 @@
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
 export DOCKER_PORT=${DOCKER_PORT:=2375}
-export VIKING_ETCD=${VIKING_ETCD:=127.0.0.1:4001}
-export VIKING_PATH=${VIKING_PATH:="/viking"}
 
 # INSTALL
 check-environment(){
@@ -77,6 +75,7 @@ stop-registrator(){
 cmd-master() {
 	check-environment
 	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
+	docker run -d -p 8791:80 binocarlos/viking http
 }
 
 cmd-etcdctl() {
