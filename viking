@@ -14,6 +14,12 @@ check-environment(){
 		echo "VIKING_IP variable needed"
 		exit 1
 	fi
+	if [ "$1" == "etcd" ]; then
+		if [ -z $VIKING_ETCD ]; then
+			echo "VIKING_ETCD variable needed"
+			exit 1
+		fi
+	fi
 }
 
 install-docker(){
@@ -52,21 +58,54 @@ cmd-install() {
 
 # SLAVE
 start-registrator(){
-	check-environment
+
 	docker run -d \
 		--name registrator \
     -v /var/run/docker.sock:/tmp/docker.sock \
-    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD$VIKING_PATH
+    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD/viking/backends
+
 }
 
-stop-registrator(){
-	docker stop registrator && docker rm registrator
+start-ambassadord(){
+
+	docker run -d \
+		--name backends \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		progrium/ambassadord --omnimode
+
+	docker run --rm \
+		--privileged \
+		--net container:backends \
+		progrium/ambassadord --setup-iptables
+
 }
 
+slave-start() {
+	start-registrator
+	start-ambassadord
+}
+
+slave-stop() {
+	docker stop registrator && docker rm registrator	
+	docker stop backends && docker rm backends
+}
+
+cmd-slave() {
+	check-environment etcd
+	case "$1" in	
+	start)              shift; slave-start $@;;
+	stop)               shift; slave-stop $@;;
+  *)
+		echo "usage: viking slave (start|stop) [OPTIONS}"
+	;;
+	esac
+}
+
+# MASTER
 master-start() {
-	running=$(docker ps | grep smesh)
+	running=$(docker ps | grep smesh)	
 	if [ -z "$1" ]; then
-		echo "usage: viking master start --peers --token"
+		echo "usage: viking master start --peers --token [OPTIONS}"
 		exit 1
 	fi
 	if [ -n "$running" ]; then
@@ -80,23 +119,25 @@ master-start() {
 	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
 	docker run -d \
 		-p 8791:80 \
-		--name viking-master \
 		--hostname $HOSTNAME \
+		--name vikingmaster \
+		-e SERVICE_NAME=vikingmaster \
 		-e VIKING_ETCD=$VIKING_ETCD \
+		-e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT \
 		binocarlos/viking http
 }
 
 master-stop() {
 	docker stop smesh && docker rm smesh
-	docker stop viking-master && docker rm viking-master
+	docker stop vikingmaster && docker rm vikingmaster
 }
 
-# MASTER
+
 cmd-master() {
-	check-environment
+	check-environment etcd
 	case "$1" in	
 	start)              shift; master-start $@;;
-	stop)              shift; master-stop $@;;
+	stop)               shift; master-stop $@;;
   *)
 		echo "usage: viking master (start|stop)"
 	;;
@@ -117,6 +158,7 @@ main() {
 	case "$1" in
 	install)            shift; cmd-install $@;;
 	master)             shift; cmd-master $@;;
+	slave)              shift; cmd-slave $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
 	*)                  cmd-proxy $@;;
 	esac
