@@ -73,22 +73,28 @@ stop-registrator(){
 	docker stop registrator && docker rm registrator
 }
 
-cmd-slave() {
-	check-environment
-	echo "slave"
-}
-
 # MASTER
 cmd-master() {
 	check-environment
-	echo "master"
+	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
+}
+
+cmd-etcdctl() {
+	check-environment
+	docker run --rm -ti binocarlos/etcdctl --peers $VIKING_IP:4001 $@
+}
+
+cmd-proxy() {
+	echo "proxy"
 }
 
 # CONTROLLER
 main() {
-	set -eo pipefail
 	case "$1" in
 	install)            shift; cmd-install $@;;
+	master)             shift; cmd-master $@;;
+	etcdctl)            shift; cmd-etcdctl $@;;
+	*)                  cmd-proxy $@;;
 	esac
 }
 
