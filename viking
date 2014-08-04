@@ -3,10 +3,10 @@
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
 export DOCKER_PORT=${DOCKER_PORT:=2375}
+export VIKING_ETCD=${VIKING_ETCD:=127.0.0.1:4001}
+export VIKING_PATH=${VIKING_PATH:="/viking"}
 
-export SMESH_URL=${SMESH_URL:="https://raw.github.com/binocarlos/docker-install/master/bootstrap.sh"}
-
-
+# INSTALL
 check-environment(){
 	if [ -z $HOSTNAME ]; then
 		echo "HOSTNAME variable needed"
@@ -19,51 +19,76 @@ check-environment(){
 }
 
 install-docker(){
-	curl -sSL $DOCKER_INSTALL | sudo sh
+	curl -sSL $DOCKER_URL | sudo sh
 	sysctl -w net.ipv4.ip_forward=1
 	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:$DOCKER_PORT'" > /etc/default/docker
 	service docker restart
 	sleep 2
 }
 
-install-smesh(){
-	curl -sSL $SMESH_URL | sudo sh
+pull-slave-images(){
+	docker pull progrium/registrator
+	docker pull progrium/ambassadord
 }
 
-cmd-core() {
-	check-environment
+pull-master-images(){
+	docker pull binocarlos/etcd
+	docker pull binocarlos/smesh
+}
+
+install-core() {	
 	install-docker
 }
 
-cmd-master() {
-	echo "master"
+install-slave() {
+	pull-slave-images
+}
+
+install-master() {
+	pull-master-images
+}
+
+cmd-install() {
+	check-environment
+	case "$1" in	
+	core)               shift; install-core $@;;
+	slave)              shift; install-slave $@;;
+	master)             shift; install-master $@;;
+  *)
+		echo "usage: viking install <mode>"
+	;;
+	esac
+}
+
+# SLAVE
+start-registrator(){
+	check-environment
+	docker run -d \
+		--name registrator \
+    -v /var/run/docker.sock:/tmp/docker.sock \
+    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD$VIKING_PATH
+}
+
+stop-registrator(){
+	docker stop registrator && docker rm registrator
 }
 
 cmd-slave() {
+	check-environment
 	echo "slave"
 }
 
-cmd-help() {
-	cat <<EOF
-
-usage: install COMMAND [args]
-
-commands:
-
-  core
-  master
-  slave
-
-EOF
+# MASTER
+cmd-master() {
+	check-environment
+	echo "master"
 }
 
+# CONTROLLER
 main() {
 	set -eo pipefail
 	case "$1" in
-	core)               shift; cmd-core $@;;
-	master)             shift; cmd-master $@;;
-	slave)              shift; cmd-slave $@;;
-	*)                  cmd-help $@;;
+	install)            shift; cmd-install $@;;
 	esac
 }
 

@@ -8,6 +8,9 @@
   "scripts": {
     "test": "node test.js"
   },
+  "bin":{
+    "viking": "cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/binocarlos/viking.git"
@@ -26,8 +29,7 @@
   },
   "homepage": "https://github.com/binocarlos/viking",
   "dependencies": {
-    "minimist": "^0.2.0",
-    "trig": "^0.2.1"
+    "minimist": "^0.2.0"
   },
   "devDependencies": {
     "tape": "^2.12.3"

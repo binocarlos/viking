@@ -1,7 +1,4 @@
-.PHONY: install
-
-install:
-	./install core
+.PHONY: vagrant
 
 vagrant:
 	usermod -aG docker vagrant
