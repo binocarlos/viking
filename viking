@@ -2,7 +2,6 @@
 
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
-export DOCKER_PORT=${DOCKER_PORT:=2375}
 
 # INSTALL
 check-environment(){
@@ -25,7 +24,7 @@ check-environment(){
 install-docker(){
 	curl -sSL $DOCKER_URL | sudo sh
 	sysctl -w net.ipv4.ip_forward=1
-	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:$DOCKER_PORT'" > /etc/default/docker
+	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:2375'" > /etc/default/docker
 	service docker restart
 	sleep 2
 }
@@ -35,8 +34,9 @@ install-core() {
 }
 
 install-slave() {
-	docker pull progrium/registrator
-	docker pull progrium/ambassadord
+	#docker pull progrium/registrator
+	#docker pull progrium/ambassadord
+	echo ""
 }
 
 install-master() {
@@ -58,12 +58,12 @@ cmd-install() {
 
 # SLAVE
 start-registrator(){
-
+	VIKING_ETCD=$1
+	
 	docker run -d \
 		--name registrator \
     -v /var/run/docker.sock:/tmp/docker.sock \
-    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD/viking/backends
-
+    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD:4001/viking/backends
 }
 
 start-ambassadord(){
@@ -81,8 +81,18 @@ start-ambassadord(){
 }
 
 slave-start() {
-	start-registrator
+	if [ -z $VIKING_MASTERS ]; then
+		echo "VIKING_MASTERS variable needed"
+		exit 1
+	fi
+	IFS=', ' read -a masters <<< "$VIKING_MASTERS"
+	start-registrator "${masters[0]}"
 	start-ambassadord
+	docker run -d \
+		--hostname $HOSTNAME \
+		--name vikingslave \
+		-e "VIKING_MASTERS=$VIKING_MASTERS" \
+		binocarlos/viking slave $@
 }
 
 slave-stop() {
@@ -112,19 +122,16 @@ master-start() {
 		echo "the master is already running"
 		exit 1
 	fi
-	if [ -z $VIKING_ETCD ]; then
-		echo "VIKING_ETCD variable needed"
-		exit 1
-	fi
+	
 	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
 	docker run -d \
 		-p 8791:80 \
 		--hostname $HOSTNAME \
 		--name vikingmaster \
 		-e SERVICE_NAME=vikingmaster \
-		-e VIKING_ETCD=$VIKING_ETCD \
+		-e VIKING_ETCD=$VIKING_IP:4001 \
 		-e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT \
-		binocarlos/viking http
+		binocarlos/viking master $@
 }
 
 master-stop() {
