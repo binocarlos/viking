@@ -2,6 +2,7 @@
 
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
+export DOCKER_PORT=${DOCKER_PORT:=2375}
 
 # INSTALL
 check-environment(){
@@ -13,18 +14,24 @@ check-environment(){
 		echo "VIKING_IP variable needed"
 		exit 1
 	fi
-	if [ "$1" == "etcd" ]; then
-		if [ -z $VIKING_ETCD ]; then
-			echo "VIKING_ETCD variable needed"
-			exit 1
-		fi
+	if [ -z $VIKING_MASTERS ]; then
+		echo "VIKING_MASTERS variable needed"
+		exit 1
 	fi
+	if [ -z $VIKING_ETCD ]; then
+		IFS=',' read -a masters <<< "$VIKING_MASTERS"
+		VIKING_ETCD="${masters[0]}"
+	fi
+}
+
+docker-environment(){
+	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_IP:4001 -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT"
 }
 
 install-docker(){
 	curl -sSL $DOCKER_URL | sudo sh
 	sysctl -w net.ipv4.ip_forward=1
-	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:2375'" > /etc/default/docker
+	echo "DOCKER_OPTS='-H unix:///var/run/docker.sock -H tcp://$VIKING_IP:$DOCKER_PORT'" > /etc/default/docker
 	service docker restart
 	sleep 2
 }
@@ -58,8 +65,6 @@ cmd-install() {
 
 # SLAVE
 start-registrator(){
-	VIKING_ETCD=$1
-	
 	docker run -d \
 		--name registrator \
     -v /var/run/docker.sock:/tmp/docker.sock \
@@ -81,17 +86,13 @@ start-ambassadord(){
 }
 
 slave-start() {
-	if [ -z $VIKING_MASTERS ]; then
-		echo "VIKING_MASTERS variable needed"
-		exit 1
-	fi
-	IFS=', ' read -a masters <<< "$VIKING_MASTERS"
-	start-registrator "${masters[0]}"
+	start-registrator
 	start-ambassadord
+	env=$(docker-environment)
 	docker run -d \
-		--hostname $HOSTNAME \
+		-p 8792:80 $env \		
 		--name vikingslave \
-		-e "VIKING_MASTERS=$VIKING_MASTERS" \
+		-e "SERVICE_NAME=vikingslave" \
 		binocarlos/viking slave $@
 }
 
@@ -115,7 +116,7 @@ cmd-slave() {
 master-start() {
 	running=$(docker ps | grep smesh)	
 	if [ -z "$1" ]; then
-		echo "usage: viking master start --peers --token [OPTIONS}"
+		echo "usage: viking master start --peers | --token [OPTIONS}"
 		exit 1
 	fi
 	if [ -n "$running" ]; then
@@ -125,12 +126,9 @@ master-start() {
 	
 	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
 	docker run -d \
-		-p 8791:80 \
-		--hostname $HOSTNAME \
+		-p 8791:80 `docker-environment` \		
 		--name vikingmaster \
-		-e SERVICE_NAME=vikingmaster \
-		-e VIKING_ETCD=$VIKING_IP:4001 \
-		-e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT \
+		-e "SERVICE_NAME=vikingmaster" \
 		binocarlos/viking master $@
 }
 
@@ -138,7 +136,6 @@ master-stop() {
 	docker stop smesh && docker rm smesh
 	docker stop vikingmaster && docker rm vikingmaster
 }
-
 
 cmd-master() {
 	check-environment etcd
@@ -149,6 +146,14 @@ cmd-master() {
 		echo "usage: viking master (start|stop)"
 	;;
 	esac
+}
+
+cmd-env() {
+	docker run --rm -ti \
+		--name vikingenv `docker-environment` \
+		--hostname $HOSTNAME \
+		-e "SERVICE_NAME=vikingenv" \
+		binocarlos/viking env
 }
 
 cmd-etcdctl() {
@@ -165,6 +170,7 @@ main() {
 	case "$1" in
 	install)            shift; cmd-install $@;;
 	master)             shift; cmd-master $@;;
+	env)                shift; cmd-env $@;;
 	slave)              shift; cmd-slave $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
 	*)                  cmd-proxy $@;;
