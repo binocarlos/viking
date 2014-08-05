@@ -88,10 +88,10 @@ start-ambassadord(){
 slave-start() {
 	start-registrator
 	start-ambassadord
-	env=$(docker-environment)
 	docker run -d \
-		-p 8792:80 $env \		
+		-p 8792:80 `docker-environment` \
 		--name vikingslave \
+		--hostname $HOSTNAME \
 		-e "SERVICE_NAME=vikingslave" \
 		binocarlos/viking slave $@
 }
@@ -123,11 +123,11 @@ master-start() {
 		echo "the master is already running"
 		exit 1
 	fi
-	
 	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
 	docker run -d \
-		-p 8791:80 `docker-environment` \		
+		-p 8791:80 `docker-environment` \
 		--name vikingmaster \
+		--hostname $HOSTNAME \
 		-e "SERVICE_NAME=vikingmaster" \
 		binocarlos/viking master $@
 }
