@@ -1,3 +1,4 @@
+var Slave = require('../lib/slave')
 var args = require('minimist')(process.argv, {
 	alias:{
 		
@@ -6,7 +7,10 @@ var args = require('minimist')(process.argv, {
 		
 	}
 })
-
-setInterval(function(){
-	console.log('checking services')
-},1000)
+var slave = Slave(args)
+slave.start(function(err){
+	if(err){
+		console.error(err)
+		process.exit(1)
+	}
+})

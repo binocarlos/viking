@@ -1,4 +1,4 @@
-var http = require('http')
+var Master = require('../lib/master')
 var args = require('minimist')(process.argv, {
 	alias:{
 		
@@ -7,9 +7,10 @@ var args = require('minimist')(process.argv, {
 		
 	}
 })
-
-var app = function(req,res){
-	res.end('ok')
-}
-var server = http.createServer(app)
-server.listen(80)
+var master = Master(args)
+master.start(function(err){
+	if(err){
+		console.error(err)
+		process.exit(1)
+	}
+})

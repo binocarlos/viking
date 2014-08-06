@@ -3,6 +3,7 @@
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
 export DOCKER_PORT=${DOCKER_PORT:=2375}
+export VIKING_PATH=${VIKING_PATH:="/viking"}
 
 # INSTALL
 check-environment(){
@@ -25,7 +26,7 @@ check-environment(){
 }
 
 docker-environment(){
-	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_IP:4001 -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT"
+	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_IP:4001 -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT -e VIKING_PATH:=$VIKING_PATH"
 }
 
 install-docker(){
@@ -68,7 +69,7 @@ start-registrator(){
 	docker run -d \
 		--name registrator \
     -v /var/run/docker.sock:/tmp/docker.sock \
-    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD:4001/viking/backends
+    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD:4001$VIKING_PATH/backends
 }
 
 start-ambassadord(){
