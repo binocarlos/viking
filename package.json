@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "Docker based deployment platform",
   "main": "index.js",
-  "bin": {},
+  "bin": {
+    "viking": "cli.js"
+  },
   "directories": {},
   "scripts": {
     "test": "node test.js"
-  },
-  "bin":{
-    "viking": "cli.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +28,9 @@
   },
   "homepage": "https://github.com/binocarlos/viking",
   "dependencies": {
+    "etcdjs": "^1.1.1",
+    "http-master-proxy": "^0.1.2",
+    "locked": "^2.1.0",
     "minimist": "^0.2.0"
   },
   "devDependencies": {

@@ -3,7 +3,10 @@
 readonly IMAGE="binocarlos/viking"
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
 export DOCKER_PORT=${DOCKER_PORT:=2375}
-export VIKING_PATH=${VIKING_PATH:="/viking"}
+export VIKING_MASTER_PORT=${VIKING_MASTER_PORT:=8791}
+export VIKING_ETCD_PATH=${VIKING_ETCD_PATH:="/viking"}
+export VIKING_ETCD_PORT=${VIKING_ETCD_PORT:=4001}
+export VIKING_ETCD_PEERPORT=${VIKING_ETCD_PEERPORT:=7001}
 
 # INSTALL
 check-environment(){
@@ -21,12 +24,12 @@ check-environment(){
 	fi
 	if [ -z $VIKING_ETCD ]; then
 		IFS=',' read -a masters <<< "$VIKING_MASTERS"
-		VIKING_ETCD="${masters[0]}"
+		VIKING_ETCD="${masters[0]}:$VIKING_ETCD_PORT"
 	fi
 }
 
 docker-environment(){
-	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_IP:4001 -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT -e VIKING_PATH:=$VIKING_PATH"
+	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_ETCD -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_DOCKER=$VIKING_IP:$DOCKER_PORT -e VIKING_ETCD_PATH:=$VIKING_ETCD_PATH"
 }
 
 install-docker(){
@@ -65,11 +68,12 @@ cmd-install() {
 }
 
 # SLAVE
+# registrator / ambassadord & slave monitor
 start-registrator(){
 	docker run -d \
 		--name registrator \
     -v /var/run/docker.sock:/tmp/docker.sock \
-    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD:4001$VIKING_PATH/backends
+    -h $HOSTNAME progrium/registrator -ip=$VIKING_IP etcd://$VIKING_ETCD:$VIKING_ETCD_PORT$VIKING_ETCD_PATH/network
 }
 
 start-ambassadord(){
@@ -90,10 +94,9 @@ slave-start() {
 	start-registrator
 	start-ambassadord
 	docker run -d \
-		-p 8792:80 `docker-environment` \
+		`docker-environment` \
 		--name vikingslave \
 		--hostname $HOSTNAME \
-		-e "SERVICE_NAME=vikingslave" \
 		binocarlos/viking slave $@
 }
 
@@ -104,7 +107,7 @@ slave-stop() {
 
 cmd-slave() {
 	check-environment etcd
-	case "$1" in	
+	case "$1" in
 	start)              shift; slave-start $@;;
 	stop)               shift; slave-stop $@;;
   *)
@@ -114,6 +117,7 @@ cmd-slave() {
 }
 
 # MASTER
+# etcd + master http api
 master-start() {
 	running=$(docker ps | grep smesh)	
 	if [ -z "$1" ]; then
@@ -124,17 +128,19 @@ master-start() {
 		echo "the master is already running"
 		exit 1
 	fi
-	$(docker run --rm binocarlos/smesh start --hostname $HOSTNAME --address $VIKING_IP $@)
+	$(docker run --rm binocarlos/smesh start --name vikingetcd --hostname $HOSTNAME --address $VIKING_IP --port $VIKING_ETCD_PORT --peerport $VIKING_ETCD_PEERPORT --dockerargs="-e SERVICE_NAME=vikingetcd" $@)
+	sleep 1
 	docker run -d \
-		-p 8791:80 `docker-environment` \
+		-p $VIKING_MASTER_PORT:80 `docker-environment` \
 		--name vikingmaster \
 		--hostname $HOSTNAME \
 		-e "SERVICE_NAME=vikingmaster" \
+		-e "VIKING_MASTER_PORT=$VIKING_MASTER_PORT" \
 		binocarlos/viking master $@
 }
 
 master-stop() {
-	docker stop smesh && docker rm smesh
+	docker stop vikingetcd && docker rm vikingetcd
 	docker stop vikingmaster && docker rm vikingmaster
 }
 
@@ -151,7 +157,7 @@ cmd-master() {
 
 cmd-etcdctl() {
 	check-environment
-	docker run --rm -ti binocarlos/etcdctl --peers $VIKING_IP:4001 $@
+	docker run --rm -ti binocarlos/etcdctl --peers $VIKING_IP:$VIKING_ETCD_PORT $@
 }
 
 cmd-proxy() {

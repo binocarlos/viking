@@ -1,4 +1,4 @@
-.PHONY: vagrant
+.PHONY: image vagrant
 
 image:
 	docker build -t binocarlos/viking .
