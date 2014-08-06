@@ -10,10 +10,30 @@ var commands = {
 		console.log(JSON.stringify(slave.info(args), null, 4))
 	},
 	join:function(){
-		console.log('join')
+		slave.join(args, function(err){
+			if(err){
+				console.error(err)
+				process.exit(1)
+			}
+			var info = slave.info(args)
+			console.log('joined')
+			console.log('hostname: ' + info.hostname)
+			console.log('ip: ' + info.ip)
+			console.log('tags: ' + info.tags.join(', '))
+		})
 	},
 	leave:function(){
-		console.log('leave')
+		slave.leave(args, function(err){
+			if(err){
+				console.error(err)
+				process.exit(1)
+			}
+			var info = slave.info(args)
+			console.log('left')
+			console.log('hostname: ' + info.hostname)
+			console.log('ip: ' + info.ip)
+			console.log('tags: ' + info.tags.join(', '))
+		})
 	}
 }
 if(!commands[cmd]){
