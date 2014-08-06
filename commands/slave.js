@@ -32,7 +32,6 @@ var commands = {
 			console.log('left')
 			console.log('hostname: ' + info.hostname)
 			console.log('ip: ' + info.ip)
-			console.log('tags: ' + info.tags.join(', '))
 		})
 	}
 }

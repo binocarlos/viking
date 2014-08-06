@@ -1,6 +1,7 @@
 #!/bin/bash
 
 readonly IMAGE="binocarlos/viking"
+source ~/.vikingrc
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
 export DOCKER_PORT=${DOCKER_PORT:=2375}
 export VIKING_MASTER_PORT=${VIKING_MASTER_PORT:=8791}
