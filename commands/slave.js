@@ -1,7 +1,7 @@
 var Slave = require('../lib/slave')
 var args = require('minimist')(process.argv, {
 	alias:{
-		
+		'tags':'t'
 	},
 	default:{
 		
