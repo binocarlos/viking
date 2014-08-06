@@ -149,21 +149,16 @@ cmd-master() {
 	esac
 }
 
-cmd-env() {
-	docker run --rm -ti \
-		--name vikingenv `docker-environment` \
-		--hostname $HOSTNAME \
-		-e "SERVICE_NAME=vikingenv" \
-		binocarlos/viking env
-}
-
 cmd-etcdctl() {
 	check-environment
 	docker run --rm -ti binocarlos/etcdctl --peers $VIKING_IP:4001 $@
 }
 
 cmd-proxy() {
-	docker run --rm -ti binocarlos/viking $@
+	docker run --rm -ti \
+		--name vikingcli `docker-environment` \
+		--hostname $HOSTNAME \
+		binocarlos/viking $@
 }
 
 # CONTROLLER
@@ -171,7 +166,6 @@ main() {
 	case "$1" in
 	install)            shift; cmd-install $@;;
 	master)             shift; cmd-master $@;;
-	env)                shift; cmd-env $@;;
 	slave)              shift; cmd-slave $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
 	*)                  cmd-proxy $@;;
