@@ -1,16 +1,23 @@
+var utils = require('../lib/utils')
 var Slave = require('../lib/slave')
-var args = require('minimist')(process.argv, {
-	alias:{
-		'tags':'t'
-	},
-	default:{
-		
-	}
+var args = utils.getArgs({
+	'tag':'t'
 })
 var slave = Slave(args)
-slave.start(function(err){
-	if(err){
-		console.error(err)
-		process.exit(1)
+var cmd = args._[3]
+var commands = {
+	info:function(){
+		console.log(JSON.stringify(slave.info(args), null, 4))
+	},
+	join:function(){
+		console.log('join')
+	},
+	leave:function(){
+		console.log('leave')
 	}
-})
+}
+if(!commands[cmd]){
+	console.error(cmd + ' command not found')
+	process.exit(1)
+}
+commands[cmd]()

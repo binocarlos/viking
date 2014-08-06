@@ -1,7 +1,5 @@
-var memwatch = require('memwatch');
 var fs = require('fs')
 var path = require('path')
-memwatch.on('leak', function(info) { console.dir(info) });
 function commandPath(name){
 	return path.join(__dirname, 'commands', command + '.js')
 }
