@@ -119,30 +119,56 @@ cmd-slave() {
 
 # MASTER
 # etcd + master http api
-master-start() {
-	running=$(docker ps | grep smesh)	
+
+
+etcd-start() {
 	if [ -z "$1" ]; then
 		echo "usage: viking master start --peers | --token [OPTIONS}"
 		exit 1
 	fi
+	running=$(docker ps | grep smesh)	
 	if [ -n "$running" ]; then
 		echo "the master is already running"
 		exit 1
 	fi
 	$(docker run --rm binocarlos/smesh start --name vikingetcd --hostname $HOSTNAME --address $VIKING_IP --port $VIKING_ETCD_PORT --peerport $VIKING_ETCD_PEERPORT --dockerargs="-e SERVICE_NAME=vikingetcd" $@)
-	sleep 1
-	docker run -d \
+}
+
+etcd-stop() {
+	docker stop vikingetcd && docker rm vikingetcd	
+}
+
+api-start() {
+	DEV_VOLUME=""
+	DOCKER_ARGS="-d"
+	if [ -n "$VIKING_DEV" ]; then
+		DEV_VOLUME="-v $VIKING_DEV:/srv/viking"
+		DOCKER_ARGS="-ti --rm"
+		echo "running dev mode"
+	fi
+	docker run $DOCKER_ARGS \
 		-p $VIKING_MASTER_PORT:80 `docker-environment` \
 		--name vikingmaster \
 		--hostname $HOSTNAME \
 		-e "SERVICE_NAME=vikingmaster" \
 		-e "VIKING_MASTER_PORT=$VIKING_MASTER_PORT" \
+		$DEV_VOLUME \
 		binocarlos/viking master $@
 }
 
+api-stop() {
+	docker stop vikingmaster && docker rm vikingmaster	
+}
+
+master-start() {
+	etcd-start $@
+	sleep 1
+	api-start	$@
+}
+
 master-stop() {
-	docker stop vikingetcd && docker rm vikingetcd
-	docker stop vikingmaster && docker rm vikingmaster
+	etcd-stop $@
+	api-stop	$@
 }
 
 cmd-master() {
@@ -150,6 +176,28 @@ cmd-master() {
 	case "$1" in	
 	start)              shift; master-start $@;;
 	stop)               shift; master-stop $@;;
+  *)
+		echo "usage: viking master (start|stop)"
+	;;
+	esac
+}
+
+cmd-etcd() {
+	check-environment etcd
+	case "$1" in	
+	start)              shift; etcd-start $@;;
+	stop)               shift; etcd-stop $@;;
+  *)
+		echo "usage: viking etcd (start|stop)"
+	;;
+	esac
+}
+
+cmd-api() {
+	check-environment etcd
+	case "$1" in	
+	start)              shift; api-start $@;;
+	stop)               shift; api-stop $@;;
   *)
 		echo "usage: viking master (start|stop)"
 	;;
@@ -174,6 +222,8 @@ main() {
 	install)            shift; cmd-install $@;;
 	master)             shift; cmd-master $@;;
 	slave)              shift; cmd-slave $@;;
+	etcd)               shift; cmd-etcd $@;;
+	api)                shift; cmd-api $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
 	*)                  cmd-proxy $@;;
 	esac
