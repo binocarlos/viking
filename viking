@@ -29,6 +29,16 @@ check-environment(){
 	fi
 }
 
+devargs(){
+	DEV_VOLUME=""
+	DOCKER_ARGS="-d"
+	if [ -n "$VIKING_DEV" ]; then
+		DEV_VOLUME="-v $VIKING_DEV:/srv/viking"
+		DOCKER_ARGS="-ti --rm"
+		echo "running dev mode"
+	fi
+}
+
 docker-environment(){
 	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_ETCD -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_MASTER_PORT=$VIKING_MASTER_PORT -e DOCKER_PORT=$DOCKER_PORT -e VIKING_ETCD_PATH:=$VIKING_ETCD_PATH"
 }
@@ -92,16 +102,23 @@ start-ambassadord(){
 }
 
 slave-start() {
+	devargs
 	start-registrator
 	start-ambassadord
-	docker run -d \
+	docker run --rm \
 		`docker-environment` \
-		--name vikingslave \
+		--name vikingslave $DEV_VOLUME \
 		--hostname $HOSTNAME \
-		binocarlos/viking slave $@
+		binocarlos/viking slave join $@
 }
 
 slave-stop() {
+	devargs
+	docker run --rm \
+		`docker-environment` \
+		--name vikingslave $DEV_VOLUME \
+		--hostname $HOSTNAME \
+		binocarlos/viking slave leave $@
 	docker stop registrator && docker rm registrator	
 	docker stop backends && docker rm backends
 }
@@ -112,7 +129,12 @@ cmd-slave() {
 	start)              shift; slave-start $@;;
 	stop)               shift; slave-stop $@;;
   *)
-		echo "usage: viking slave (start|stop) [OPTIONS}"
+		devargs
+		docker run --rm \
+		`docker-environment` \
+		--name vikingslave $DEV_VOLUME \
+		--hostname $HOSTNAME \
+		binocarlos/viking slave $@
 	;;
 	esac
 }
@@ -139,13 +161,7 @@ etcd-stop() {
 }
 
 api-start() {
-	DEV_VOLUME=""
-	DOCKER_ARGS="-d"
-	if [ -n "$VIKING_DEV" ]; then
-		DEV_VOLUME="-v $VIKING_DEV:/srv/viking"
-		DOCKER_ARGS="-ti --rm"
-		echo "running dev mode"
-	fi
+	devargs
 	docker run $DOCKER_ARGS \
 		-p $VIKING_MASTER_PORT:80 `docker-environment` \
 		--name vikingmaster \
