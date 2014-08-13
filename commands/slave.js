@@ -39,4 +39,6 @@ if(!commands[cmd]){
 	console.error(cmd + ' command not found')
 	process.exit(1)
 }
+console.log('-------------------------------------------');
+console.log(cmd)
 commands[cmd]()

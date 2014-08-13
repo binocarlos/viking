@@ -28,10 +28,16 @@
   },
   "homepage": "https://github.com/binocarlos/viking",
   "dependencies": {
+    "async": "^0.9.0",
+    "etcd-flatten": "0.0.2",
+    "etcd-live-collection": "^0.1.0",
     "etcdjs": "^1.1.1",
+    "flocker": "^1.3.1",
+    "flocker-cache": "^0.1.0",
     "http-master-proxy": "^0.1.2",
-    "locked": "^2.1.1",
-    "minimist": "^0.2.0"
+    "locked": "^2.2.2",
+    "minimist": "^0.2.0",
+    "routes-router": "^4.1.0"
   },
   "devDependencies": {
     "tape": "^2.12.3"

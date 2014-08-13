@@ -160,7 +160,7 @@ etcd-stop() {
 	docker stop vikingetcd && docker rm vikingetcd	
 }
 
-api-start() {
+apiserver-start() {
 	devargs
 	docker run $DOCKER_ARGS \
 		-p $VIKING_MASTER_PORT:80 `docker-environment` \
@@ -172,7 +172,7 @@ api-start() {
 		binocarlos/viking master $@
 }
 
-api-stop() {
+apiserver-stop() {
 	docker stop vikingmaster && docker rm vikingmaster	
 }
 
@@ -209,11 +209,11 @@ cmd-etcd() {
 	esac
 }
 
-cmd-api() {
+cmd-apiserver() {
 	check-environment etcd
 	case "$1" in	
-	start)              shift; api-start $@;;
-	stop)               shift; api-stop $@;;
+	start)              shift; apiserver-start $@;;
+	stop)               shift; apiserver-stop $@;;
   *)
 		echo "usage: viking master (start|stop)"
 	;;
@@ -239,7 +239,7 @@ main() {
 	master)             shift; cmd-master $@;;
 	slave)              shift; cmd-slave $@;;
 	etcd)               shift; cmd-etcd $@;;
-	api)                shift; cmd-api $@;;
+	apiserver)          shift; cmd-apiserver $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
 	*)                  cmd-proxy $@;;
 	esac
