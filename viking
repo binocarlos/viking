@@ -40,7 +40,7 @@ devargs(){
 }
 
 docker-environment(){
-	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_ETCD -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_MASTER_PORT=$VIKING_MASTER_PORT -e DOCKER_PORT=$DOCKER_PORT -e VIKING_ETCD_PATH:=$VIKING_ETCD_PATH"
+	echo "-e VIKING_IP=$VIKING_IP -e VIKING_ETCD=$VIKING_ETCD -e VIKING_MASTERS=$VIKING_MASTERS -e VIKING_MASTER_PORT=$VIKING_MASTER_PORT -e DOCKER_PORT=$DOCKER_PORT -e VIKING_ETCD_PATH=$VIKING_ETCD_PATH"
 }
 
 install-docker(){
@@ -103,8 +103,8 @@ start-ambassadord(){
 
 slave-start() {
 	devargs
-	start-registrator
-	start-ambassadord
+	#start-registrator
+	#start-ambassadord
 	docker run --rm \
 		`docker-environment` \
 		--name vikingslave $DEV_VOLUME \
@@ -119,8 +119,8 @@ slave-stop() {
 		--name vikingslave $DEV_VOLUME \
 		--hostname $HOSTNAME \
 		binocarlos/viking slave leave $@
-	docker stop registrator && docker rm registrator	
-	docker stop backends && docker rm backends
+	#docker stop registrator && docker rm registrator	
+	#docker stop backends && docker rm backends
 }
 
 cmd-slave() {

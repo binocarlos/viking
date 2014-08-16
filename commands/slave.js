@@ -1,7 +1,7 @@
 var utils = require('../lib/utils')
 var Slave = require('../lib/slave')
 var args = utils.getArgs({
-	'tag':'t'
+	'tags':'t'
 })
 var slave = Slave(args)
 var cmd = args._[3]
@@ -39,6 +39,4 @@ if(!commands[cmd]){
 	console.error(cmd + ' command not found')
 	process.exit(1)
 }
-console.log('-------------------------------------------');
-console.log(cmd)
 commands[cmd]()
