@@ -1,5 +1,7 @@
+var minimist = require('minimist')
 var strippedArgs = process.argv.slice(2)
-var args = require('minimist')(strippedArgs)
+
+var args = minimist(strippedArgs)
 
 // check for volumes and links
 if(args._[1]=='run'){
@@ -8,12 +10,64 @@ if(args._[1]=='run'){
 	var image = args._[2]
 
 	var hit = false
-	var dockerargs = strippedArgs.filter(function(arg){
+	var dockerargs = []
+	var imageargs = []
+	strippedArgs.filter(function(arg){
 		if(arg==image){
 			hit = true
 		}
-		return !hit
+		if(hit){
+			imageargs.push(arg)
+		}
+		else{
+			dockerargs.push(arg)
+		}
 	})
 
-	console.log(dockerargs)
+	dockerargs = dockerargs.slice(2)
+	var parsedDockerArgs = minimist(dockerargs, {
+		alias:{
+			v:'volume'
+		}
+	})
+	var links = parsedDockerArgs.link
+	var volumes = parsedDockerArgs.volume
+	var volumesFrom = parsedDockerArgs['volumes-from']
+
+	if(links){
+		if(typeof(links)=='string'){
+			links = [links]
+		}
+		links.forEach(function(link, i){
+			dockerargs.push('-e')
+			dockerargs.push('VIKING_LINK' + i + '=' + link)
+		})
+	}
+
+	if(volumes){
+		if(typeof(volumes)=='string'){
+			volumes = [volumes]
+		}	
+		volumes.forEach(function(volume, i){
+			dockerargs.push('-e')
+			dockerargs.push('VIKING_VOLUME' + i + '=' + volume)
+		})
+	}
+
+	if(volumesFrom){
+		if(typeof(volumesFrom)=='string'){
+			volumesFrom = [volumesFrom]
+		}	
+		volumesFrom.forEach(function(volume, i){
+			dockerargs.push('-e')
+			dockerargs.push('VIKING_VOLUMEFROM' + i + '=' + volume)
+		})
+	}
+
+	var allArgs = ['docker', 'run'].concat(dockerargs, imageargs)
+
+	console.log(allArgs.join(' '))
+}
+else{
+	console.log(strippedArgs.join(' '))
 }
