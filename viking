@@ -226,10 +226,19 @@ cmd-etcdctl() {
 }
 
 cmd-proxy() {
+	devargs
 	docker run --rm -ti \
 		--name vikingcli `docker-environment` \
-		--hostname $HOSTNAME \
+		--hostname $HOSTNAME $DEV_VOLUME \
 		binocarlos/viking $@
+}
+
+cmd-docker() {
+	devargs
+	docker run --rm -ti \
+		--name vikingcli `docker-environment` \
+		--hostname $HOSTNAME $DEV_VOLUME \
+		binocarlos/viking docker $@
 }
 
 # CONTROLLER
@@ -241,6 +250,7 @@ main() {
 	etcd)               shift; cmd-etcd $@;;
 	apiserver)          shift; cmd-apiserver $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
+	docker)							shift; cmd-docker $@;;
 	*)                  cmd-proxy $@;;
 	esac
 }
