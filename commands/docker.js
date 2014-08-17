@@ -1,7 +1,9 @@
+var utils = require('../lib/utils')
 var minimist = require('minimist')
 var strippedArgs = process.argv.slice(2)
-
+var vikingargs = utils.getArgs()
 var args = minimist(strippedArgs)
+var master = vikingargs.masters.split(',')[0] + ':' + vikingargs.masterport
 
 // check for volumes and links
 if(args._[1]=='run'){
@@ -64,10 +66,18 @@ if(args._[1]=='run'){
 		})
 	}
 
-	var allArgs = ['docker', 'run'].concat(dockerargs, imageargs)
+	
+	var allArgs = ['docker', '-H', master, 'run'].concat(dockerargs, imageargs)
 
-	console.log(allArgs.join(' '))
+	console.log('eval ' + allArgs.join(' '))
 }
 else{
-	console.log(strippedArgs.join(' '))
+
+	
+	strippedArgs.shift()
+	strippedArgs.unshift(master)
+	strippedArgs.unshift('-H')
+	strippedArgs.unshift('docker')
+
+	console.log('eval ' + strippedArgs.join(' '))
 }
