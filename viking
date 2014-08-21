@@ -1,5 +1,4 @@
 #!/bin/bash
-
 readonly IMAGE="binocarlos/viking"
 source ~/.vikingrc
 export DOCKER_URL=${DOCKER_URL:="https://get.docker.io/ubuntu/"}
@@ -244,7 +243,7 @@ cmd-docker() {
 # CONTROLLER
 main() {
 	case "$1" in
-	install)            shift; cmd-install $@;;
+	install)            shift; arpanet $@;;
 	master)             shift; cmd-master $@;;
 	slave)              shift; cmd-slave $@;;
 	etcd)               shift; cmd-etcd $@;;
