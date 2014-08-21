@@ -48,6 +48,7 @@ Point the other masters at the IP of the first.
 On each slave (which can be the masters if you want):
 
 ```bash
+$ viking install slave
 $ viking slave start
 ```
 

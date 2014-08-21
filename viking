@@ -21,8 +21,8 @@ docker-environment(){
 # Master actions
 master-start() {
 	arpanet master start $@
-	sleep 1
-	apiserver-start	$@
+	#sleep 1
+	#apiserver-start	$@
 }
 
 master-stop() {
@@ -35,20 +35,20 @@ master-stop() {
 slave-start() {
 	devargs
 	arpanet slave start
-	docker run --rm \
-		`docker-environment` \
-		--name vikingslave $DEV_VOLUME \
-		--hostname $HOSTNAME \
-		binocarlos/viking slave join $@
+	#docker run --rm \
+	#	`docker-environment` \
+	#	--name vikingslave $DEV_VOLUME \
+	#	--hostname $HOSTNAME \
+	#	binocarlos/viking slave join $@
 }
 
 slave-stop() {
 	devargs
-	docker run --rm \
-		`docker-environment` \
-		--name vikingslave $DEV_VOLUME \
-		--hostname $HOSTNAME \
-		binocarlos/viking slave leave $@
+	#docker run --rm \
+	#	`docker-environment` \
+	#	--name vikingslave $DEV_VOLUME \
+	#	--hostname $HOSTNAME \
+	#	binocarlos/viking slave leave $@
 	arpanet slave stop
 }
 
@@ -73,8 +73,7 @@ apiserver-stop() {
 
 
 # Master Controller
-cmd-master() {
-	check-environment etcd
+cmd-master() {	
 	case "$1" in	
 	start)              shift; master-start $@;;
 	stop)               shift; master-stop $@;;
@@ -112,8 +111,7 @@ cmd-docker() {
 
 # etcdctl controller
 cmd-etcdctl() {
-	check-environment
-	docker run --rm -ti binocarlos/etcdctl --peers $VIKING_IP:$VIKING_ETCD_PORT $@
+	docker run --rm -ti binocarlos/etcdctl --peers $ARPANET_IP:4001 $@
 }
 
 #proxy controller
