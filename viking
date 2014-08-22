@@ -34,22 +34,22 @@ master-stop() {
 # slave actions
 slave-start() {
 	devargs
-	arpanet slave start
-	#docker run --rm \
-	#	`docker-environment` \
-	#	--name vikingslave $DEV_VOLUME \
-	#	--hostname $HOSTNAME \
-	#	binocarlos/viking slave join $@
+	#arpanet slave start
+	docker run --rm \
+		`docker-environment` \
+		--name vikingslave $DEV_VOLUME \
+		--hostname $HOSTNAME \
+		binocarlos/viking slave join $@
 }
 
 slave-stop() {
 	devargs
-	#docker run --rm \
-	#	`docker-environment` \
-	#	--name vikingslave $DEV_VOLUME \
-	#	--hostname $HOSTNAME \
-	#	binocarlos/viking slave leave $@
-	arpanet slave stop
+	docker run --rm \
+		`docker-environment` \
+		--name vikingslave $DEV_VOLUME \
+		--hostname $HOSTNAME \
+		binocarlos/viking slave leave $@
+	#arpanet slave stop
 }
 
 

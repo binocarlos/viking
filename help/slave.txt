@@ -1,0 +1,11 @@
+
+Usage: viking slave COMMAND [OPTIONS]
+
+Control a viking slave node
+
+Commands:
+    start       Start the viking slave
+    stop        Stop the viking slave
+
+Options:
+

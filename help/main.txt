@@ -1,0 +1,13 @@
+
+Usage: viking [OPTIONS] COMMAND [arg...]
+ -H=host:port to connect
+
+A docker based platform as a service.
+
+Commands:
+    install     Install master or slave components
+    master      Control a viking master
+    slave       Control a viking slave
+    docker      Run a docker command on the cluster
+    etcdctl     Run etcdctl against the masters
+

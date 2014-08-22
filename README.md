@@ -19,6 +19,10 @@ The following envrionment variables must be set for each viking node (master or 
  * ARPANET_IP - use the IP of the private network
  * ARPANET_MASTERS - comma delimited list of master IP's
 
+For development - you can set the VIKING_DEV variable to point to the current codebase.
+
+This will boot the api server without a docker image rebuild required.
+
 ## setup
 
 ### run masters

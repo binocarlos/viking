@@ -19,7 +19,6 @@ var commands = {
 			console.log('joined')
 			console.log('hostname: ' + info.hostname)
 			console.log('ip: ' + info.ip)
-			console.log('tags: ' + info.tags.join(', '))
 		})
 	},
 	leave:function(){

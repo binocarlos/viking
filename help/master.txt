@@ -1,0 +1,13 @@
+
+Usage: viking master COMMAND [OPTIONS]
+
+Control a viking master node
+
+Commands:
+    start       Start the viking master
+    stop        Stop the viking master
+
+Options:
+    --peers     'boot' or the host:port of the first etcd master (0.0.0.0:7001)
+    --token     The etcd token for the cluster
+
