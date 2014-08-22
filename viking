@@ -20,14 +20,31 @@ docker-environment(){
 
 # Master actions
 master-start() {
-	arpanet master start $@
+	#arpanet master start $@
 	#sleep 1
-	#apiserver-start	$@
+	apiserver-start	$@
 }
 
 master-stop() {
-	arpanet master stop $@
+	#arpanet master stop $@
 	apiserver-stop	$@
+}
+
+# api server actions
+apiserver-start() {
+	devargs
+	docker run $DOCKER_ARGS \
+		-p $VIKING_MASTER_PORT:80 `docker-environment` \
+		--name vikingmaster \
+		--hostname $HOSTNAME \
+		-e "SERVICE_NAME=vikingmaster" \
+		-e "VIKING_MASTER_PORT=$VIKING_MASTER_PORT" \
+		$DEV_VOLUME \
+		binocarlos/viking master $@
+}
+
+apiserver-stop() {
+	docker stop vikingmaster && docker rm vikingmaster	
 }
 
 
@@ -52,23 +69,6 @@ slave-stop() {
 	arpanet slave stop
 }
 
-
-# api server actions
-apiserver-start() {
-	devargs
-	docker run $DOCKER_ARGS \
-		-p $VIKING_MASTER_PORT:80 `docker-environment` \
-		--name vikingmaster \
-		--hostname $HOSTNAME \
-		-e "SERVICE_NAME=vikingmaster" \
-		-e "VIKING_MASTER_PORT=$VIKING_MASTER_PORT" \
-		$DEV_VOLUME \
-		binocarlos/viking master $@
-}
-
-apiserver-stop() {
-	docker stop vikingmaster && docker rm vikingmaster	
-}
 
 
 

@@ -42,7 +42,7 @@ if(args._[1]=='run'){
 		}
 		links.forEach(function(link, i){
 			dockerargs.push('-e')
-			dockerargs.push('VIKING_LINK' + i + '=' + link)
+			dockerargs.push('VIKING_LINK_' + i + '=' + link)
 		})
 	}
 
@@ -52,7 +52,7 @@ if(args._[1]=='run'){
 		}	
 		volumes.forEach(function(volume, i){
 			dockerargs.push('-e')
-			dockerargs.push('VIKING_VOLUME' + i + '=' + volume)
+			dockerargs.push('VIKING_VOLUME_' + i + '=' + volume)
 		})
 	}
 
@@ -62,7 +62,7 @@ if(args._[1]=='run'){
 		}	
 		volumesFrom.forEach(function(volume, i){
 			dockerargs.push('-e')
-			dockerargs.push('VIKING_VOLUMEFROM' + i + '=' + volume)
+			dockerargs.push('VIKING_VOLUMEFROM_' + i + '=' + volume)
 		})
 	}
 
