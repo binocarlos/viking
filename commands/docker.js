@@ -71,6 +71,25 @@ if(args._[1]=='run'){
 
 	console.log('eval ' + allArgs.join(' '))
 }
+else if(args._[1]=='ps'){
+
+	var parsedDockerArgs = minimist(process.argv, {
+		alias:{
+			a:'all'
+		}
+	})
+
+	strippedArgs.shift()
+	strippedArgs.unshift(master)
+	strippedArgs.unshift('-H')
+	strippedArgs.unshift('docker')
+	var cmd = 'eval ' + strippedArgs.join(' ')
+
+	if(!parsedDockerArgs.all){
+		cmd += " | grep -Ev 'arpanet|vikingmaster'"
+	}
+	console.log(cmd)
+}
 else{
 
 	
