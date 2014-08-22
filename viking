@@ -34,7 +34,7 @@ master-stop() {
 # slave actions
 slave-start() {
 	devargs
-	#arpanet slave start
+	arpanet slave start
 	docker run --rm \
 		`docker-environment` \
 		--name vikingslave $DEV_VOLUME \
@@ -49,7 +49,7 @@ slave-stop() {
 		--name vikingslave $DEV_VOLUME \
 		--hostname $HOSTNAME \
 		binocarlos/viking slave leave $@
-	#arpanet slave stop
+	arpanet slave stop
 }
 
 
