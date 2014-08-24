@@ -9,8 +9,8 @@ devargs(){
 	DOCKER_ARGS="-d"
 	if [ -n "$VIKING_DEV" ]; then
 		DEV_VOLUME="-v $VIKING_DEV:/srv/viking"
-		DOCKER_ARGS="-ti --rm"
-		echo "running dev mode"
+		#DOCKER_ARGS="-ti --rm"
+		#echo "running dev mode"
 	fi
 }
 

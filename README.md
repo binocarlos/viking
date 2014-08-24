@@ -82,6 +82,12 @@ Now everything is setup - you can:
 $ viking vagrant start
 ```
 
+Then run the tests:
+
+```bash
+$ viking vagrant test
+```
+
 This will boot all 3 servers into a viking cluster
 
 To stop them again:

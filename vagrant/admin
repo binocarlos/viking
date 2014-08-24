@@ -17,6 +17,7 @@ function copykeys() {
 function pullimages() {
   viking install master
   viking install slave
+  docker pull binocarlos/etcdctl
 }
 
 function buildimage() {
@@ -96,6 +97,19 @@ EOF
     $0 ssh viking master stop
     ;;
 
+  cleantest)
+    viking docker stop testweb && viking docker rm testweb
+    viking docker stop testlogic && viking docker rm testlogic
+    viking docker stop testdb && viking docker rm testdb
+    ;;
+
+  test)
+    viking docker run -d --name testdb -p 80 binocarlos/viking-test-stack-db
+    viking docker run -d --name testlogic -p 80 binocarlos/viking-test-stack-logic
+    viking docker run -d --name testweb --link testdb:db --link testlogic:logic -p 8080:80 binocarlos/viking-test-stack-web
+    #hostname=`viking locate testweb`
+    ;;
+
   help)
     echo
     cat<<EOF | sort
@@ -106,6 +120,7 @@ EOF
     ssh                                          Run an SSH command across all 3 servers
     start                                        Boot the master and slave across the cluster
     stop                                         Stop the master and slave across the cluster
+    test                                         Run the tests
 EOF
     echo
     ;;
