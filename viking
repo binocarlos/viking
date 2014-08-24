@@ -20,13 +20,13 @@ docker-environment(){
 
 # Master actions
 master-start() {
-	#arpanet master start $@
-	#sleep 1
+	arpanet master start $@
+	sleep 1
 	apiserver-start	$@
 }
 
 master-stop() {
-	#arpanet master stop $@
+	arpanet master stop $@
 	apiserver-stop	$@
 }
 
@@ -68,9 +68,6 @@ slave-stop() {
 		binocarlos/viking slave leave $@
 	arpanet slave stop
 }
-
-
-
 
 # Master Controller
 cmd-master() {	
@@ -123,6 +120,18 @@ cmd-proxy() {
 		binocarlos/viking $@
 }
 
+cmd-token() {
+	curl -L https://discovery.etcd.io/new
+}
+
+cmd-vagrant() {
+	if [ -z $VIKING_DEV ]; then
+		echo "VIKING_DEV variable needed"
+		exit 1
+	fi
+	$VIKING_DEV/vagrant/admin $@
+}
+
 # Main Controller
 main() {
 	case "$1" in
@@ -130,7 +139,9 @@ main() {
 	master)             shift; cmd-master $@;;
 	slave)              shift; cmd-slave $@;;
 	docker)							shift; cmd-docker $@;;
+	token)							shift; cmd-token $@;;
 	etcdctl)            shift; cmd-etcdctl $@;;
+  vagrant)            shift; cmd-vagrant $@;;
 	*)                  cmd-proxy $@;;
 	esac
 }

@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+masters="192.168.8.120,192.168.8.121,192.168.8.122"
+
+# install the insecure private key so we can ssh easily between nodes
+function copykeys() {
+  cp -f /vagrant/vagrant/keys/test_id_rsa /home/vagrant/.ssh/id_rsa
+  cp -f /vagrant/vagrant/keys/test_id_rsa.pub /home/vagrant/.ssh/id_rsa.pub
+
+  chown vagrant:vagrant /home/vagrant/.ssh/id_rsa /home/vagrant/.ssh/id_rsa.pub
+  chmod 600 /home/vagrant/.ssh/id_rsa /home/vagrant/.ssh/id_rsa.pub
+
+  cat /vagrant/vagrant/keys/test_id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+}
+
+function pullimages() {
+  viking install master
+  viking install slave
+}
+
+function buildimage() {
+  docker build -t binocarlos/viking /vagrant
+}
+
+function runssh() {
+  cmd=$*
+  echo "--------------------------------------------------"
+  echo "node3"
+  echo "--------------------------------------------------"
+  ssh -oStrictHostKeyChecking=no node3 "$cmd" || true
+  echo "--------------------------------------------------"
+  echo "node2"
+  echo "--------------------------------------------------"
+  ssh -oStrictHostKeyChecking=no node2 "$cmd" || true
+  echo "--------------------------------------------------"
+  echo "node1"
+  echo "--------------------------------------------------"
+  ssh -oStrictHostKeyChecking=no node1 "$cmd" || true
+}
+
+case "$1" in
+
+  bootstrap)
+    shift
+    ip=$1
+    
+    cat<<EOF >> /etc/hosts
+192.168.8.120 node1
+192.168.8.121 node2
+192.168.8.122 node3
+EOF
+
+    cat<<EOF > /home/vagrant/.vikingrc
+export ARPANET_IP=$ip
+export ARPANET_MASTERS=$masters
+export VIKING_DEV=/vagrant
+EOF
+
+    source /home/vagrant/.vikingrc
+    copykeys
+    cd /vagrant && make vagrant
+    ;;
+
+  # run a command over each vagrant server
+  ssh)
+    shift
+    runssh $@
+    ;;
+
+  pull)
+    pullimages
+    ;;
+
+  # update the images
+  images)
+    pullimages
+    buildimage
+    ;;
+
+  # get the viking masters & slaves booted across the cluster
+  start)
+    shift
+    cmd=$*
+    ssh -oStrictHostKeyChecking=no node1 "viking master start --peers boot"
+    ssh -oStrictHostKeyChecking=no node2 "viking master start --peers 192.168.8.120:7001"
+    ssh -oStrictHostKeyChecking=no node3 "viking master start --peers 192.168.8.120:7001"
+    $0 ssh viking slave start
+    ;;
+
+  # shutdown the viking masters & slaves across the cluster
+  stop)
+    shift
+    cmd=$*
+    $0 ssh viking slave stop
+    $0 ssh viking master stop
+    ;;
+
+  help)
+    echo
+    cat<<EOF | sort
+    help                                         Print the list of commands
+    bootstrap                                    Install viking on a vagrant instance
+    pull                                         Pull the core viking images
+    images                                       Pull the core viking images and build the viking image
+    ssh                                          Run an SSH command across all 3 servers
+    start                                        Boot the master and slave across the cluster
+    stop                                         Stop the master and slave across the cluster
+EOF
+    echo
+    ;;
+
+  *)
+    $0 help
+    ;;
+
+esac

@@ -1,15 +1,20 @@
-.PHONY: image vagrant install
+.PHONY: arpanet install linkscript usermod image vagrant
 
-install:
+arpanet:
 	wget -qO- https://raw.github.com/binocarlos/arpanet/master/bootstrap.sh | sudo bash
-	cp viking /usr/local/bin
-	sudo viking install core
+	arpanet install core
+
+install: arpanet
+	cp -f viking /usr/local/bin
+	docker pull binocarlos/viking
+
+linkscript:
+	ln -sf /vagrant/viking /usr/local/bin/viking
+
+usermod:
+	usermod -aG docker vagrant
 
 image:
 	docker build -t binocarlos/viking .
 
-dev:
-	ln -sf /srv/projects/viking/viking /usr/local/bin/viking
-
-vagrant:
-	usermod -aG docker vagrant
+vagrant: arpanet linkscript usermod

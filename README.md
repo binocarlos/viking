@@ -56,6 +56,40 @@ $ viking install slave
 $ viking slave start
 ```
 
+## vagrant
+
+The Vagrantfile will boot a 3 node cluster with viking installed.
+
+First vagrant up all 3 servers:
+
+```bash
+$ vagrant up
+```
+
+The first time you have vagranted - you must pull the images.
+
+SSH to node1 (192.168.8.120:2222):
+
+```bash
+$ ssh node2 viking vagrant images
+$ ssh node2 viking vagrant images
+$ ssh node3 viking vagrant images
+```
+
+Now everything is setup - you can:
+
+```bash
+$ viking vagrant start
+```
+
+This will boot all 3 servers into a viking cluster
+
+To stop them again:
+
+```bash
+$ viking vagrant stop
+```
+
 ## license
 
 MIT
