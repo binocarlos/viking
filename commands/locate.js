@@ -21,7 +21,7 @@ if(!id){
 
 var address = addresses[0]
 
-var req = hyperquest('http://' + address + '/v1/locate/' + id + '?field=' + args.field)
+var req = hyperquest('http://' + address + '/v1/locate/' + id + '?field=' + (args.field || ''))
 
 req.on('response', function(res){
 	res.pipe(concat(function(result){

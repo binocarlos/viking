@@ -94,14 +94,26 @@ EOF
     ;;
 
   test)
-    $0 start
     viking docker run -d --name testdb -p 80 binocarlos/viking-test-stack-db
-    viking docker run -d --name testlogic -p 80 binocarlos/viking-test-stack-logic
+    viking docker run -d --name testlogic.1 -p 80 binocarlos/viking-test-stack-logic
     viking docker run -d --name testweb --link testdb:db --link testlogic:logic -p 8080:80 binocarlos/viking-test-stack-web
-    sleep 2
+    echo ""
+    echo "test 1 (should be 12)"
+    echo ""
+    curl -L http://`viking locate testweb.1 -f ip`:8080/add
+    echo ""
+    echo ""
+    viking docker run -d --name testlogic.2 -p 80 binocarlos/viking-test-stack-logic
+    sleep 1
+    viking docker stop testlogic.1 && viking docker rm testlogic.1
+    sleep 1
+    echo ""
+    echo "test 2 (should be 14)"
+    echo ""
+    curl -L http://`viking locate testweb.1 -f ip`:8080/add
+    echo ""
+    echo ""
     $0 cleantest
-    $0 stop
-    #hostname=`viking locate testweb`
     ;;
 
   help)

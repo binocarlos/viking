@@ -113,7 +113,7 @@ cmd-etcdctl() {
 #proxy controller
 cmd-proxy() {
 	devargs
-	docker run --rm -ti \
+	docker run --rm \
 		--name vikingcli `docker-environment` \
 		--hostname $HOSTNAME $DEV_VOLUME \
 		binocarlos/viking $@
