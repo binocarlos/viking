@@ -106,9 +106,13 @@ EOF
     echo ""
     curl -L http://`viking locate testweb -f ip`:8080/add
     echo ""
+    echo "run a 2nd logic node"
     echo ""
     viking docker run -d --name testlogic.2 -p 80 binocarlos/viking-test-stack-logic
     sleep 1
+    echo ""
+    echo "kill the first logic node"
+    echo ""
     viking docker stop testlogic.1 && viking docker rm testlogic.1
     sleep 1
     echo ""
@@ -117,12 +121,21 @@ EOF
     curl -L http://`viking locate testweb -f ip`:8080/add
     echo ""
     echo ""
-    $0 cleantest
+    $0 cleanstacktest
     ;;
 
   imagetest)
+    echo ""
+    echo "image 1"
+    echo ""
     viking docker run -d --name test.1 binocarlos/bring-a-ping --timeout 1000
+    echo ""
+    echo "image 2"
+    echo ""
     viking docker run -d --name test.2 binocarlos/bring-a-ping --timeout 1000
+    echo ""
+    echo "image 3"
+    echo ""
     viking docker run -d --name test.3 binocarlos/bring-a-ping --timeout 1000
     $0 cleanimagetest
     ;;
