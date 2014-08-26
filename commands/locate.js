@@ -21,13 +21,13 @@ if(!id){
 
 var address = addresses[0]
 
-var req = hyperquest('http://' + address + '/v1/locate/' + id)
+var req = hyperquest('http://' + address + '/v1/locate/' + id + '?field=' + args.field)
 
 req.on('response', function(res){
 	res.pipe(concat(function(result){
 		result = result.toString()
 		if(res.statusCode!=200){
-			console.error(result)
+			console.error(res.statusCode + ': ' + result)
 			process.exit(1)
 		}
 		console.log(result)
