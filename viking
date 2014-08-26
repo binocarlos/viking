@@ -9,6 +9,9 @@ devargs(){
 	DOCKER_ARGS="-d"
 	if [ -n "$VIKING_DEV" ]; then
 		DEV_VOLUME="-v $VIKING_DEV:/srv/viking"
+		if [[ $1 == "dev" ]]; then
+			DOCKER_ARGS="-ti --rm"
+		fi
 		#DOCKER_ARGS="-ti --rm"
 		#echo "running dev mode"
 	fi
@@ -20,9 +23,17 @@ docker-environment(){
 
 # Master actions
 master-start() {
-	arpanet master start $@
-	sleep 1
-	apiserver-start	$@
+
+	if [[ $1 == "dev" ]]; then
+		apiserver-start	$@
+	elif [[ $1 == "arpanet" ]]; then
+		arpanet master start $@
+	else
+		arpanet master start $@
+		sleep 1
+		apiserver-start	$@
+	fi
+
 }
 
 master-stop() {
@@ -32,7 +43,7 @@ master-stop() {
 
 # api server actions
 apiserver-start() {
-	devargs
+	devargs $@
 	docker run $DOCKER_ARGS \
 		-p $VIKING_MASTER_PORT:80 `docker-environment` \
 		--name "vikingmaster.$HOSTNAME" \
