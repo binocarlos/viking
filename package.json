@@ -34,9 +34,9 @@
     "etcd-flatten": "0.0.2",
     "etcd-live-collection": "^0.1.2",
     "etcdjs": "^1.1.1",
-    "flocker": "^2.1.2",
-    "flocker-cache": "^0.1.0",
     "hyperquest": "^0.3.0",
+    "mdock": "^1.0.1",
+    "mdock-cache": "^1.0.0",
     "minimist": "^0.2.0",
     "routes-router": "^4.1.0"
   },

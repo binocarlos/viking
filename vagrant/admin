@@ -26,17 +26,8 @@ function buildimage() {
 
 function runssh() {
   cmd=$*
-  echo "--------------------------------------------------"
-  echo "node3"
-  echo "--------------------------------------------------"
   ssh -oStrictHostKeyChecking=no node3 "$cmd" || true
-  echo "--------------------------------------------------"
-  echo "node2"
-  echo "--------------------------------------------------"
   ssh -oStrictHostKeyChecking=no node2 "$cmd" || true
-  echo "--------------------------------------------------"
-  echo "node1"
-  echo "--------------------------------------------------"
   ssh -oStrictHostKeyChecking=no node1 "$cmd" || true
 }
 
@@ -82,7 +73,6 @@ EOF
   # get the viking masters & slaves booted across the cluster
   start)
     shift
-    cmd=$*
     ssh -oStrictHostKeyChecking=no node1 "viking master start --peers boot"
     ssh -oStrictHostKeyChecking=no node2 "viking master start --peers 192.168.8.120:7001"
     ssh -oStrictHostKeyChecking=no node3 "viking master start --peers 192.168.8.120:7001"
@@ -104,9 +94,13 @@ EOF
     ;;
 
   test)
+    $0 start
     viking docker run -d --name testdb -p 80 binocarlos/viking-test-stack-db
     viking docker run -d --name testlogic -p 80 binocarlos/viking-test-stack-logic
     viking docker run -d --name testweb --link testdb:db --link testlogic:logic -p 8080:80 binocarlos/viking-test-stack-web
+    sleep 2
+    $0 cleantest
+    $0 stop
     #hostname=`viking locate testweb`
     ;;
 
