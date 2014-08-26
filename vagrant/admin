@@ -87,20 +87,24 @@ EOF
     $0 ssh viking master stop
     ;;
 
-  cleantest)
+  cleanstacktest)
+    shift
     viking docker stop testweb && viking docker rm testweb
-    viking docker stop testlogic && viking docker rm testlogic
+    if [ -n "$1" ]; then
+      viking docker stop testlogic.1 && viking docker rm testlogic.1
+    fi
+    viking docker stop testlogic.2 && viking docker rm testlogic.2
     viking docker stop testdb && viking docker rm testdb
     ;;
 
-  test)
+  stacktest)
     viking docker run -d --name testdb -p 80 binocarlos/viking-test-stack-db
     viking docker run -d --name testlogic.1 -p 80 binocarlos/viking-test-stack-logic
     viking docker run -d --name testweb --link testdb:db --link testlogic:logic -p 8080:80 binocarlos/viking-test-stack-web
     echo ""
     echo "test 1 (should be 12)"
     echo ""
-    curl -L http://`viking locate testweb.1 -f ip`:8080/add
+    curl -L http://`viking locate testweb -f ip`:8080/add
     echo ""
     echo ""
     viking docker run -d --name testlogic.2 -p 80 binocarlos/viking-test-stack-logic
@@ -110,10 +114,33 @@ EOF
     echo ""
     echo "test 2 (should be 14)"
     echo ""
-    curl -L http://`viking locate testweb.1 -f ip`:8080/add
+    curl -L http://`viking locate testweb -f ip`:8080/add
     echo ""
     echo ""
     $0 cleantest
+    ;;
+
+  imagetest)
+    viking docker run -d --name test.1 binocarlos/bring-a-ping --timeout 1000
+    viking docker run -d --name test.2 binocarlos/bring-a-ping --timeout 1000
+    viking docker run -d --name test.3 binocarlos/bring-a-ping --timeout 1000
+    $0 cleanimagetest
+    ;;
+
+  cleanimagetest)
+    viking docker stop test.1 test.2 test.3
+    viking docker rm test.1 test.2 test.3
+    $0 ssh docker rmi --no-prune binocarlos/bring-a-ping
+    ;;
+
+  test)
+    $0 stacktest
+    $0 imagetest
+    ;;
+
+  cleantest)
+    $0 cleanstacktest
+    $0 cleanimagetest
     ;;
 
   help)
@@ -127,6 +154,11 @@ EOF
     start                                        Boot the master and slave across the cluster
     stop                                         Stop the master and slave across the cluster
     test                                         Run the tests
+    cleantest                                    Clean up after the tests if they fail
+    stacktest                                    Run the stack test
+    cleanstacktest                               Clean after the stack test
+    imagetest                                    Run the image test
+    cleanimagetest                               Clean after the image test
 EOF
     echo
     ;;

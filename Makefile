@@ -18,3 +18,8 @@ image:
 	docker build -t binocarlos/viking .
 
 vagrant: arpanet linkscript usermod
+
+test:
+	./vagrant/admin start
+	./vagrant/admin test
+	./vagrant/admin stop

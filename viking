@@ -35,7 +35,7 @@ apiserver-start() {
 	devargs
 	docker run $DOCKER_ARGS \
 		-p $VIKING_MASTER_PORT:80 `docker-environment` \
-		--name vikingmaster \
+		--name "vikingmaster.$HOSTNAME" \
 		--hostname $HOSTNAME \
 		-e "SERVICE_NAME=vikingmaster" \
 		-e "VIKING_MASTER_PORT=$VIKING_MASTER_PORT" \
@@ -44,7 +44,7 @@ apiserver-start() {
 }
 
 apiserver-stop() {
-	docker stop vikingmaster && docker rm vikingmaster	
+	docker stop "vikingmaster.$HOSTNAME" && docker rm "vikingmaster.$HOSTNAME"	
 }
 
 # slave actions
@@ -53,7 +53,7 @@ slave-start() {
 	arpanet slave start
 	docker run --rm \
 		`docker-environment` \
-		--name vikingslave $DEV_VOLUME \
+		--name "vikingslave.$HOSTNAME" $DEV_VOLUME \
 		--hostname $HOSTNAME \
 		binocarlos/viking slave join $@
 }
@@ -62,7 +62,7 @@ slave-stop() {
 	devargs
 	docker run --rm \
 		`docker-environment` \
-		--name vikingslave $DEV_VOLUME \
+		--name "vikingslave.$HOSTNAME" $DEV_VOLUME \
 		--hostname $HOSTNAME \
 		binocarlos/viking slave leave $@
 	arpanet slave stop
@@ -89,7 +89,7 @@ cmd-slave() {
 		devargs
 		docker run --rm \
 		`docker-environment` \
-		--name vikingslave $DEV_VOLUME \
+		--name "vikingslave.$HOSTNAME" $DEV_VOLUME \
 		--hostname $HOSTNAME \
 		binocarlos/viking slave $@
 	;;
@@ -100,7 +100,7 @@ cmd-slave() {
 cmd-docker() {
 	devargs
 	$(docker run --rm \
-		--name vikingcli `docker-environment` \
+		--name "vikingdocker.$HOSTNAME" `docker-environment` \
 		--hostname $HOSTNAME $DEV_VOLUME \
 		binocarlos/viking docker $@)
 }
@@ -114,7 +114,7 @@ cmd-etcdctl() {
 cmd-proxy() {
 	devargs
 	docker run --rm \
-		--name vikingcli `docker-environment` \
+		--name "vikingcli.$HOSTNAME" `docker-environment` \
 		--hostname $HOSTNAME $DEV_VOLUME \
 		binocarlos/viking $@
 }
