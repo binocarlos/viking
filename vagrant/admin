@@ -87,6 +87,16 @@ EOF
     $0 ssh viking master stop
     ;;
 
+  stopmasters)
+    ssh -oStrictHostKeyChecking=no node1 "docker stop vikingmaster.node1 && docker rm vikingmaster.node1" || true
+    ssh -oStrictHostKeyChecking=no node2 "docker stop vikingmaster.node2 && docker rm vikingmaster.node2" || true
+    ssh -oStrictHostKeyChecking=no node3 "docker stop vikingmaster.node3 && docker rm vikingmaster.node3" || true
+    ;;
+
+  devmaster)
+    viking master start dev
+    ;;
+
   cleanstacktest)
     shift
     viking docker stop testweb && viking docker rm testweb
