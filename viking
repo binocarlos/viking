@@ -28,6 +28,8 @@ master-start() {
 		apiserver-start	$@
 	elif [[ $1 == "arpanet" ]]; then
 		arpanet master start $@
+	elif [[ $1 == "api" ]]; then
+		apiserver-start
 	else
 		arpanet master start $@
 		sleep 1

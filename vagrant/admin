@@ -93,18 +93,22 @@ EOF
     ssh -oStrictHostKeyChecking=no node3 "docker stop vikingmaster.node3 && docker rm vikingmaster.node3" || true
     ;;
 
+  startmasters)
+    ssh -oStrictHostKeyChecking=no node1 "viking master start api"
+    ssh -oStrictHostKeyChecking=no node2 "viking master start api"
+    ssh -oStrictHostKeyChecking=no node3 "viking master start api"
+    ;;
+
   devmaster)
     viking master start dev
     ;;
 
   cleanstacktest)
     shift
-    viking docker stop testweb && viking docker rm testweb
-    if [ -n "$1" ]; then
-      viking docker stop testlogic.1 && viking docker rm testlogic.1
-    fi
-    viking docker stop testlogic.2 && viking docker rm testlogic.2
-    viking docker stop testdb && viking docker rm testdb
+    viking docker stop testweb && viking docker rm testweb || true
+    viking docker stop testlogic.1 && viking docker rm testlogic.1 || true
+    viking docker stop testlogic.2 && viking docker rm testlogic.2 || true
+    viking docker stop testdb && viking docker rm testdb || true
     ;;
 
   stacktest)
@@ -151,8 +155,12 @@ EOF
     ;;
 
   cleanimagetest)
-    viking docker stop test.1 test.2 test.3
-    viking docker rm test.1 test.2 test.3
+    viking docker stop test.1 || true
+    viking docker stop test.2 || true
+    viking docker stop test.3 || true
+    viking docker rm test.1 || true
+    viking docker rm test.2 || true
+    viking docker rm test.3 || true
     $0 ssh docker rmi --no-prune binocarlos/bring-a-ping
     ;;
 
