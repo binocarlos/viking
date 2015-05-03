@@ -1,0 +1,89 @@
+#!/bin/bash
+
+export VIKING_CONFIG=${VIKING_CONFIG:=/etc/viking/config}
+
+if [[ -f $VIKING_CONFIG ]]; then
+	source $VIKING_CONFIG
+fi
+
+export DOCKER_HOST=${DOCKER_HOST:=unix:///var/run/docker.sock}
+export VIKING_INSTALLATION=${viking_INSTALLATION:=/opt/viking}
+
+cmd-test() {
+	case "$1" in
+	all)
+		cmd-test unit
+		cmd-test integration
+		cmd-test acceptance
+;;
+unit)
+		echo "unit tests"
+;;
+integration)
+		echo "integration tests"
+;;
+acceptance)
+		bats --tap $VIKING_INSTALLATION/test/vagrant
+;;
+	*)
+		usage test
+;;
+	esac
+}
+
+cmd-build() {
+	echo build
+}
+
+cmd-status() {
+	echo status
+}
+
+cmd-down() {
+	echo down
+}
+
+cmd-up() {
+	echo up
+}
+
+cmd-configure() {
+	echo configure
+}
+
+usage() {
+	case "$1" in
+	test)
+cat <<EOF
+Usage:
+viking test <all|acceptance|integration|unit>
+EOF
+;;
+	*)
+cat <<EOF
+Usage:
+viking test <all|acceptance|integration|unit>
+viking build
+viking status
+viking down
+viking up
+viking help [command]
+EOF
+;;
+	esac
+}
+
+main() {
+	case "$1" in
+	test)					      shift; cmd-test $@;;
+	build)              shift; cmd-build $@;;
+	status)             shift; cmd-status $@;;
+	down)               shift; cmd-down $@;;
+	configure)          shift; cmd-configure $@;;
+	up)                 shift; cmd-up $@;;
+	help)               shift; usage $@;;
+	*)                  usage $@;;
+	esac
+}
+
+main "$@"
