@@ -1,9 +1,0 @@
-
-Usage: viking install COMMAND
-
-Install viking components
-
-Commands:
-    master      Install master components
-    slave       Install slave components
-

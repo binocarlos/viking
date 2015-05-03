@@ -1,8 +1,0 @@
-
-Usage: viking locate <id> [OPTIONS]
-
-Locate and print information about the host a container is running on
-
-Options:
-    --field     Print back a single field of the host data (e.g. ip)
-
