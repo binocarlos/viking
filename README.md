@@ -1,4 +1,4 @@
-# bigstack
+# viking
 
 Infrastructure management for docker stacks
 
@@ -17,8 +17,8 @@ Then change directory to where you keep projects e.g. `cd projects`.
 Then we need to clone the source code:
 
 ```
-$ git clone https://github.com/binocarlos/bigstack
-$ cd bigstack
+$ git clone https://github.com/binocarlos/viking
+$ cd viking
 ```
 
 ### start vm
@@ -26,7 +26,7 @@ $ cd bigstack
 We use vagrant to start and stop virtualbox vms - to start the VM: 
 
 ```bash
-$ cd bigstack
+$ cd viking
 $ vagrant up
 ```
 
@@ -53,12 +53,12 @@ $ cd /vagrant
 $ ls -la
 ```
 
-### bigstack
+### viking
 
 There is an admin script that will manage the stack for development:
 
 ```bash
-$ bigstack help
+$ viking help
 ```
 
 ### create
@@ -66,7 +66,7 @@ $ bigstack help
 Create a new project at path - this will automatically call configure
 
 ```bash
-$ bigstack create <path>
+$ viking create <path>
 ```
 
 ### configure
@@ -74,34 +74,34 @@ $ bigstack create <path>
 This gets a project configured.
 
 ```bash
-$ bigstack configure <path>
+$ viking configure <path>
 ```
 
 ### vars
 
-You can manually set variables in the .bigstack file inside the project folder
+You can manually set variables in the .viking file inside the project folder
 
 ```bash
-$ cat myproject/.bigstack
+$ cat myproject/.viking
 API_VERSION=v1
 ```
 
 ### start services
 
 ```bash
-$ bigstack up <path>
+$ viking up <path>
 ```
 
 ### stop services
 
 ```bash
-$ bigstack down <path>
+$ viking down <path>
 ```
 
 ### show service status
 
 ```bash
-$ bigstack status <path>
+$ viking status <path>
 ```
 
 ### view app in browser
@@ -113,7 +113,7 @@ A port is mounted onto the host so you can enter `http://127.0.0.1:8080` into a 
 The client CSS and JS is bundled - use the admin bundle command to rebuild it
 
 ```bash
-$ bigstack build <path>
+$ viking build <path>
 ```
 
 ## tests
@@ -140,10 +140,10 @@ To run the acceptance tests - the following variables must be configured:
 cloud provider vars here
 ```
 
-You can `bigstack configure` to enter these values.
+You can `viking configure` to enter these values.
 
 ```bash
-$ bigstack test acceptance
+$ viking test acceptance
 ```
 
 will run the acceptance tests
@@ -151,17 +151,17 @@ will run the acceptance tests
 ### integration tests
 
 ```bash
-$ bigstack test integration
+$ viking test integration
 ```
 
 ### unit tests
 
 ```bash
-$ bigstack test unit
+$ viking test unit
 ```
 
 ### all tests
 
 ```bash
-$ bigstack test all
+$ viking test all
 ```
