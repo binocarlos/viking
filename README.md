@@ -116,6 +116,10 @@ The client CSS and JS is bundled - use the admin bundle command to rebuild it
 $ viking build <path>
 ```
 
+## config
+
+You can configure the variables for viking itself by setting values in the `/etc/viking/config` file.
+
 ## tests
 
 There are various types of test:
